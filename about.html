@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>ABOUT — Emotion Design System</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+
+/* =========================
+🌫 背景（保持你的15.jpg）
+========================= */
+body{
+  margin:0;
+  background:url("images/15.jpg") center/cover fixed no-repeat;
+  overflow:hidden;
+  color:#111;
+}
+
+/* =========================
+🧠 页面容器
+========================= */
+.sheet{
+  position:relative;
+  width:100%;
+  height:100vh;
+  padding:80px;
+  box-sizing:border-box;
+}
+
+/* =========================
+✍ 标题（手写感）
+========================= */
+.title{
+  font-family:"Caveat", cursive;
+  font-size:52px;
+  color:#111;
+  text-shadow:0 2px 10px rgba(255,255,255,0.35);
+}
+
+/* =========================
+📄 主文本（✔ 已升级黑色+设计感）
+========================= */
+.body-text{
+  width:58%;
+  margin-top:40px;
+  font-family:"Inter", sans-serif;
+  font-size:16px;
+  line-height:1.95;
+
+  /* ✔ 黑色优化 */
+  color:rgba(15,15,15,0.88);
+
+  /* ✨ 可读性增强 */
+  text-shadow:0 1px 1px rgba(255,255,255,0.35);
+
+  /* 📄 纸面质感 */
+  background:rgba(255,255,255,0.55);
+  padding:22px 24px;
+  border-radius:16px;
+
+  /* 🌫 毛玻璃层 */
+  backdrop-filter:blur(6px);
+
+  /* 🌑 浮起阴影 */
+  box-shadow:0 18px 50px rgba(0,0,0,0.18);
+
+  border:1px solid rgba(255,255,255,0.35);
+}
+
+/* =========================
+📝 批注卡片（保留设计稿感）
+========================= */
+.note{
+  position:absolute;
+  width:240px;
+  padding:16px;
+  font-family:"Caveat", cursive;
+  font-size:18px;
+  color:#222;
+  background:rgba(255,255,255,0.9);
+  border-radius:14px;
+  box-shadow:0 25px 60px rgba(0,0,0,0.35);
+  transform:rotate(var(--r));
+  transition:0.4s;
+  cursor:pointer;
+}
+
+/* hover增强 */
+.note:hover{
+  transform:scale(1.08) rotate(0deg);
+}
+
+/* =========================
+📌 连接线
+========================= */
+.note::after{
+  content:"";
+  position:absolute;
+  width:90px;
+  height:1px;
+  background:rgba(0,0,0,0.2);
+  left:-90px;
+  top:50%;
+}
+
+/* =========================
+🌫 鼠标光影
+========================= */
+.glow{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:radial-gradient(circle at var(--x,50%) var(--y,50%),
+    rgba(255,255,255,0.15),
+    rgba(120,180,255,0.08),
+    rgba(255,120,200,0.06),
+    transparent 60%);
+  mix-blend-mode:overlay;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="glow" id="glow"></div>
+
+<div class="sheet">
+
+  <div class="title">ABOUT / Emotion is a design residue</div>
+
+  <div class="body-text">
+
+情绪不是一个“状态结果”，  
+它更像是视觉与感知之间不断漂移的残留物。  
+
+<br><br>
+
+在大多数系统中，情绪被压缩成标签：  
+开心、难过、平静、焦虑。  
+
+但真实体验并不属于任何单一分类，  
+它是叠加的、互相冲突的、甚至无法命名的。  
+
+<br><br>
+
+这个项目的起点并不是“情绪管理”，  
+而是对“情绪被如何表达”的质疑。  
+
+<br><br>
+
+我开始思考一个问题：  
+如果情绪不是被描述，而是被“呈现”，会发生什么？  
+
+<br><br>
+
+于是界面不再作为工具存在，  
+而成为一种状态容器。  
+
+颜色、光影、颗粒、呼吸速度，  
+取代语言成为表达方式。  
+
+<br><br>
+
+在这个系统中，  
+点击不是操作，而是进入一种短暂的心理空间偏移。  
+
+<br><br>
+
+你看到的不是“你是什么情绪”，  
+而是“情绪正在如何发生”。  
+
+<br><br>
+
+它不追求准确，也不追求解释。  
+它更接近一种视觉化的停顿。  
+
+<br><br>
+
+我认为情绪不需要被解决，  
+它需要被允许存在在界面中。  
+
+<br><br>
+
+如果这个系统有意义，  
+它不是帮助你理解自己，  
+而是让你短暂地不必理解自己。
+
+  </div>
+
+  <!-- 批注 -->
+  <div class="note" style="top:18%;left:66%;--r:-4deg">
+    情绪 ≠ 分类系统  
+    是感知残留
+  </div>
+
+  <div class="note" style="top:42%;left:70%;--r:3deg">
+    UI = 心理空间  
+    不是工具
+  </div>
+
+  <div class="note" style="top:66%;left:62%;--r:-2deg">
+    点击 = 状态切换  
+    不是操作
+  </div>
+
+</div>
+
+<script>
+
+/* 鼠标光影 */
+window.addEventListener("mousemove",(e)=>{
+  const g=document.getElementById("glow");
+  g.style.setProperty("--x", e.clientX+"px");
+  g.style.setProperty("--y", e.clientY+"px");
+});
+
+</script>
+
+</body>
+</html>

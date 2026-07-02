@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>Emotion Decision Core</title>
+
+<style>
+body{
+  margin:0;
+  font-family:"PingFang SC";
+  background:url("images/8.jpg") center/cover no-repeat fixed;
+}
+
+.panel{
+  width:700px;
+  margin:80px auto;
+  background:rgba(255,255,255,0.92);
+  padding:30px;
+  border-radius:20px;
+  text-align:center;
+}
+
+.btn{
+  display:inline-block;
+  margin:10px;
+  padding:10px 14px;
+  background:#fff;
+  border-radius:12px;
+  cursor:pointer;
+  box-shadow:0 8px 18px rgba(0,0,0,0.1);
+  transition:0.2s;
+}
+
+.btn:hover{
+  transform:scale(1.05);
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="panel">
+
+<h2>🧠 Emotion Decision Core</h2>
+
+<div class="btn" onclick="go('happy')">😊 开心</div>
+<div class="btn" onclick="go('calm')">😌 平静</div>
+<div class="btn" onclick="go('tired')">🥱 疲惫</div>
+<div class="btn" onclick="go('sad')">🌧 低落</div>
+<div class="btn" onclick="go('think')">💭 思考</div>
+
+</div>
+
+<script>
+
+function go(mood){
+  location.href = "action.html?mood=" + mood;
+}
+
+</script>
+
+</body>
+</html>

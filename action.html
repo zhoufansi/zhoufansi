@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>Action</title>
+
+<style>
+body{
+  margin:0;
+  font-family:"PingFang SC";
+  background:url("images/8.jpg") center/cover no-repeat fixed;
+}
+
+.box{
+  width:700px;
+  margin:80px auto;
+  background:rgba(255,255,255,0.92);
+  padding:30px;
+  border-radius:20px;
+  text-align:center;
+}
+
+.btn{
+  display:inline-block;
+  margin:10px;
+  padding:10px 14px;
+  background:#fff;
+  border-radius:12px;
+  cursor:pointer;
+  box-shadow:0 8px 18px rgba(0,0,0,0.1);
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+<h2 id="title"></h2>
+<div id="content"></div>
+</div>
+
+<script>
+
+const mood = new URLSearchParams(location.search).get("mood");
+
+const map = {
+
+happy:{
+title:"😊 开心",
+actions:[
+{t:"✨ 创作表达", v:"creative"},
+{t:"📸 记录瞬间", v:"memory"}
+]
+},
+
+calm:{
+title:"😌 平静",
+actions:[
+{t:"🫧 呼吸训练", v:"breath"}
+]
+},
+
+sad:{
+title:"🌧 低落",
+actions:[
+{t:"🧠 情绪倾倒", v:"write"}
+]
+},
+
+tired:{
+title:"🥱 疲惫",
+actions:[
+{t:"🛌 放空", v:"sleep"}
+]
+},
+
+think:{
+title:"💭 思考",
+actions:[
+{t:"📊 写作整理", v:"write"}
+]
+}
+
+};
+
+document.getElementById("title").innerText = map[mood].title;
+
+document.getElementById("content").innerHTML =
+map[mood].actions.map(a=>`
+<div class="btn" onclick="go('${a.v}','${mood}')">
+${a.t}
+</div>
+`).join("");
+
+function go(type,mood){
+  window.location.href = "practice.html?type="+type+"&mood="+mood;
+}
+
+</script>
+
+</body>
+</html>
