@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>Emotion OS Pro</title>
+
+<style>
+
+/* =========================
+   🌸 背景
+========================= */
+body{
+  margin:0;
+  font-family:Arial;
+  background: linear-gradient(135deg,#ffe6f1,#fff3fb);
+  overflow:hidden;
+}
+
+/* 噪点 */
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:url("https://grainy-gradients.vercel.app/noise.svg");
+  opacity:0.05;
+  pointer-events:none;
+}
+
+/* =========================
+   📖 上半区（日记 - 更小）
+========================= */
+#top{
+  height:40vh;   /* ⭐缩小 */
+  overflow:auto;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  padding:10px;
+}
+
+.card{
+  width:180px;   /* ⭐更小 */
+  background:rgba(255,255,255,0.85);
+  border-radius:14px;
+  padding:8px;
+  box-shadow:0 8px 18px rgba(255,150,200,0.2);
+  font-size:12px;
+}
+
+/* =========================
+   🎨 下半区（更大）
+========================= */
+#bottom{
+  height:60vh;   /* ⭐变大 */
+  display:flex;
+  border-top:1px solid rgba(255,170,200,0.3);
+  background:rgba(255,255,255,0.6);
+}
+
+#canvasArea{
+  flex:1;
+  position:relative;
+}
+
+canvas{
+  position:absolute;
+  width:100%;
+  height:100%;
+  z-index:1;
+}
+
+#tools{
+  width:300px;
+  padding:10px;
+}
+
+/* =========================
+   🌸 sticker（关键修复）
+========================= */
+.sticker{
+  position:absolute;
+  font-size:20px;   /* ⭐更小 */
+  cursor:grab;
+  user-select:none;
+  z-index:99999;
+}
+
+/* =========================
+   按钮
+========================= */
+button{
+  width:100%;
+  margin-top:5px;
+}
+
+textarea{
+  width:100%;
+  height:120px;   /* ⭐更大输入区 */
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="top"></div>
+
+<div id="bottom">
+
+  <div id="canvasArea">
+    <canvas id="draw"></canvas>
+  </div>
+
+  <div id="tools">
+
+    <textarea id="text" placeholder="写你的日记..."></textarea>
+
+    <button onclick="saveAll()">保存日记</button>
+
+    <hr>
+
+    <!-- 🌸 10个元素（已修复完整） -->
+    <button onclick="addSticker('⭐')">⭐</button>
+    <button onclick="addSticker('💗')">💗</button>
+    <button onclick="addSticker('🌸')">🌸</button>
+    <button onclick="addSticker('✨')">✨</button>
+    <button onclick="addSticker('🌙')">🌙</button>
+    <button onclick="addSticker('☁️')">☁️</button>
+    <button onclick="addSticker('🎀')">🎀</button>
+    <button onclick="addSticker('🌼')">🌼</button>
+    <button onclick="addSticker('🍓')">🍓</button>
+    <button onclick="addSticker('🫧')">🫧</button>
+
+  </div>
+
+</div>
+
+<script>
+
+/* =========================
+   🧠 数据
+========================= */
+let db = JSON.parse(localStorage.getItem("emotionOS") || "[]");
+
+/* =========================
+   📖 渲染日记
+========================= */
+function render(){
+
+  const top=document.getElementById("top");
+  top.innerHTML="";
+
+  db.slice().reverse().forEach(item=>{
+
+    const card=document.createElement("div");
+    card.className="card";
+
+    card.innerHTML=`
+      <b>日记</b><br>
+      ${item.text || ""}<br>
+      <small>${item.time}</small>
+    `;
+
+    /* 回放贴纸 */
+    if(item.stickers){
+      item.stickers.forEach(s=>{
+        const el=document.createElement("div");
+        el.innerText=s.emoji;
+        el.style.position="absolute";
+        el.style.left=s.x;
+        el.style.top=s.y;
+        el.style.fontSize="14px";
+        card.appendChild(el);
+      });
+    }
+
+    top.appendChild(card);
+  });
+}
+
+/* =========================
+   🖌 canvas
+========================= */
+const canvas=document.getElementById("draw");
+const ctx=canvas.getContext("2d");
+
+function resize(){
+  canvas.width=canvas.parentElement.clientWidth;
+  canvas.height=canvas.parentElement.clientHeight;
+}
+resize();
+
+let drawing=false;
+
+canvas.onmousedown=()=>drawing=true;
+canvas.onmouseup=()=>drawing=false;
+
+canvas.onmousemove=(e)=>{
+  if(!drawing)return;
+  ctx.fillStyle="#ff69b4";
+  ctx.beginPath();
+  ctx.arc(e.offsetX,e.offsetY,2,0,Math.PI*2);
+  ctx.fill();
+};
+
+/* =========================
+   🌸 sticker系统（10元素完整）
+========================= */
+function addSticker(emoji){
+
+  const el=document.createElement("div");
+  el.className="sticker";
+  el.innerText=emoji;
+
+  el.style.left=Math.random()*60+"vw";
+  el.style.top=Math.random()*40+"vh";
+
+  let drag=false,ox=0,oy=0;
+
+  el.onmousedown=(e)=>{
+    drag=true;
+    ox=e.clientX-el.offsetLeft;
+    oy=e.clientY-el.offsetTop;
+  };
+
+  document.onmousemove=(e)=>{
+    if(!drag)return;
+    el.style.left=(e.clientX-ox)+"px";
+    el.style.top=(e.clientY-oy)+"px";
+  };
+
+  document.onmouseup=()=>drag=false;
+
+  el.ondblclick=()=>el.remove();
+
+  document.getElementById("canvasArea").appendChild(el);
+}
+
+/* =========================
+   💾 保存（完全不丢）
+========================= */
+function saveAll(){
+
+  const text=document.getElementById("text").value;
+  const img=canvas.toDataURL("image/png");
+
+  const stickers=[];
+
+  document.querySelectorAll(".sticker").forEach(s=>{
+    stickers.push({
+      emoji:s.innerText,
+      x:s.style.left,
+      y:s.style.top
+    });
+  });
+
+  db.push({
+    text,
+    img,
+    stickers,
+    time:new Date().toLocaleString()
+  });
+
+  localStorage.setItem("emotionOS",JSON.stringify(db));
+
+  /* 清理 */
+  document.getElementById("text").value="";
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  document.querySelectorAll(".sticker").forEach(s=>s.remove());
+
+  render();
+  function render(){
+
+  const top = document.getElementById("top");
+  top.innerHTML = "";
+
+  db.slice().reverse().forEach(item => {
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    /* 🧠 文字 */
+    const text = document.createElement("div");
+    text.innerHTML = `<b>日记</b><br>${item.text || ""}<br><small>${item.time}</small>`;
+    card.appendChild(text);
+
+    /* 🎨 涂鸦（关键修复在这里） */
+    if(item.img){
+
+      const img = document.createElement("img");
+
+      img.src = item.img;
+
+      img.style.width = "100%";
+      img.style.marginTop = "6px";
+      img.style.borderRadius = "10px";
+
+      /* ❗防止不显示关键修复 */
+      img.onload = ()=>{
+        img.style.display = "block";
+      };
+
+      card.appendChild(img);
+    }
+
+    /* 🌸 贴纸回放 */
+    if(item.stickers){
+
+      item.stickers.forEach(s => {
+
+        const el = document.createElement("div");
+
+        el.innerText = s.emoji;
+
+        el.style.position = "absolute";
+        el.style.left = s.x;
+        el.style.top = s.y;
+        el.style.fontSize = "14px";
+        el.style.pointerEvents = "none";
+
+        card.appendChild(el);
+      });
+    }
+
+    top.appendChild(card);
+  });
+}
+}
+
+render();
+
+</script>
+
+</body>
+</html>

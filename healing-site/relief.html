@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relief 情绪流体山脉 | Emotion System 3.0</title>
+<link rel="stylesheet" href="style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=ZCOOL+KuaiLe&family=VT323&display=swap" rel="stylesheet">
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+body{
+  min-height:100vh;
+  padding:40px 15px;
+  display:flex;
+  flex-direction:column;
+  gap:32px;
+  font-family:"ZCOOL KuaiLe",sans-serif;
+  color:#466256;
+  overflow-x:hidden;
+  position:relative;
+}
+.bg-flow{
+  position:fixed;
+  inset:0;
+  z-index:-2;
+  background:
+    radial-gradient(circle 30% at 10% 15%,rgba(245,230,238,0.45),transparent),
+    radial-gradient(circle 35% at 90% 20%,rgba(230,248,238,0.45),transparent),
+    radial-gradient(circle 30% at 20% 85%,rgba(248,242,234,0.45),transparent),
+    radial-gradient(circle 32% at 85% 88%,rgba(232,244,248,0.45),transparent),
+    linear-gradient(180deg,#faf6f3 0%,#eff6f3 48%,#f6f0e7 100%);
+  background-size:130% 130%;
+  animation:bgDrift 20s ease-in-out infinite alternate;
+}
+@keyframes bgDrift{
+  0%{background-position:0% 0%;}
+  50%{background-position:100% 60%;}
+  100%{background-position:0% 100%;}
+}
+.pixel-noise{
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  opacity:0.06;
+  background-image:url("data:image/svg+xml,%3Csvg width='256' height='256' viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFreq='0.7' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23)'/%3E%3C/svg%3E");
+}
+.pixel{
+  font-family:"VT323",monospace;
+  letter-spacing:1.5px;
+  color:#628474;
+  font-size:14px;
+}
+.cursive{
+  font-family:"Ma Shan Zheng",cursive;
+  letter-spacing:6px;
+  color:#376454;
+}
+.browser{
+  width:min(1280px,100%);
+  margin:0 auto;
+  border:1px solid rgba(160,180,170,0.35);
+  border-radius:16px;
+  background:rgba(255,255,255,0.92);
+  backdrop-filter:blur(12px);
+  box-shadow:0 14px 36px rgba(140,165,155,0.18);
+  overflow:hidden;
+  animation:winFloat 10s ease-in-out infinite;
+}
+@keyframes winFloat{
+  0%,100%{transform:translateY(0) translateX(0);}
+  50%{transform:translateY(-7px) translateX(3px);}
+}
+.browser-header{
+  height:42px;
+  background:rgba(242,246,244,0.92);
+  border-bottom:1px solid rgba(180,200,190,0.3);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:0 18px;
+}
+.dot-group span{
+  width:12px;height:12px;border-radius:50px;display:inline-block;margin-right:6px;
+}
+.dot-r{background:#e5a3a3;}
+.dot-y{background:#e5d8a3;}
+.dot-g{background:#a3d8b8;}
+.canvas-wrap{
+  width:100%;
+  height:520px;
+  position:relative;
+  padding:24px;
+}
+#flowCanvas{
+  width:100%;
+  height:100%;
+  border-radius:12px;
+  background:rgba(255,255,255,0.45);
+  border:1px dashed rgba(160,180,170,0.35);
+}
+.mood-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:14px;
+  padding:24px;
+}
+.mood-card{
+  padding:18px 16px;
+  border-radius:14px;
+  background:rgba(255,255,255,0.82);
+  border:1px solid rgba(180,200,190,0.25);
+  text-align:center;
+  cursor:pointer;
+  transition:0.3s ease;
+}
+.mood-card:hover{
+  transform:translateY(-8px);
+  box-shadow:0 12px 26px rgba(130,160,150,0.18);
+}
+.mood-card h3{
+  font-size:18px;
+  margin-bottom:6px;
+}
+.mood-card .pixel{
+  font-size:12px;
+}
+.back-btn{
+  position:fixed;
+  top:20px;left:20px;
+  padding:8px 12px;
+  background:rgba(255,255,255,0.9);
+  border-radius:10px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.1);
+  cursor:pointer;
+  z-index:999;
+}
+.desc{
+  text-align:center;
+  padding:0 24px 34px;
+  line-height:1.7;
+  color:#506c60;
+}
+@media(max-width:768px){
+  .canvas-wrap{height:420px;}
+  .mood-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+<div class="bg-flow"></div>
+<div class="pixel-noise"></div>
+
+<div class="back-btn pixel" onclick="location.href='index.html'">← 返回系统</div>
+
+<div class="browser">
+  <div class="browser-header">
+    <div class="dot-group">
+      <span class="dot-r"></span>
+      <span class="dot-y"></span>
+      <span class="dot-g"></span>
+    </div>
+    <span class="pixel">emotion-system/relief-terrain</span>
+    <span class="pixel">情绪流体山脉</span>
+  </div>
+
+  <div class="canvas-wrap">
+    <canvas id="flowCanvas"></canvas>
+  </div>
+
+  <div class="mood-grid">
+    <div class="mood-card" onclick="setMoodFlow('calm')">
+      <h3>🌿 平静</h3>
+      <span class="pixel">缓流山脉</span>
+    </div>
+    <div class="mood-card" onclick="setMoodFlow('happy')">
+      <h3>😊 愉悦</h3>
+      <span class="pixel">起伏光浪</span>
+    </div>
+    <div class="mood-card" onclick="setMoodFlow('sad')">
+      <h3>🌧 低落</h3>
+      <span class="pixel">下沉山谷</span>
+    </div>
+    <div class="mood-card" onclick="setMoodFlow('tired')">
+      <h3>😩 疲惫</h3>
+      <span class="pixel">缓坡低云</span>
+    </div>
+    <div class="mood-card" onclick="setMoodFlow('anxious')">
+      <h3>🌀 烦躁</h3>
+      <span class="pixel">湍流风暴</span>
+    </div>
+    <div class="mood-card" onclick="setMoodFlow('think')">
+      <h3>🧠 思虑</h3>
+      <span class="pixel">回旋漩涡</span>
+    </div>
+  </div>
+
+  <div class="desc">
+    <h2 class="cursive">情绪流体山脉 Relief</h2>
+    <p>选择一种情绪，画布会生成由连续线条组成的流动地形，让内心状态以更壮观的方式展开、起伏、释放。</p>
+  </div>
+</div>
+
+<script src="core.js"></script>
+<script>
+const canvas = document.getElementById("flowCanvas");
+const ctx = canvas.getContext("2d");
+
+let w, h;
+let time = 0;
+let currentMood = "calm";
+let particles = [];
+
+const layers = [
+  { color: "rgba(90, 140, 120, 0.9)", lineWidth: 2.4, alpha: 0.18 },
+  { color: "rgba(70, 120, 100, 0.85)", lineWidth: 2.0, alpha: 0.14 },
+  { color: "rgba(50, 100, 80, 0.8)", lineWidth: 1.6, alpha: 0.10 },
+  { color: "rgba(40, 80, 65, 0.75)", lineWidth: 1.3, alpha: 0.06 },
+  { color: "rgba(120, 180, 160, 0.6)", lineWidth: 1.0, alpha: 0.03 }
+];
+
+function resize() {
+  const wrap = canvas.parentElement;
+  w = wrap.clientWidth;
+  h = wrap.clientHeight;
+  canvas.width = w;
+  canvas.height = h;
+}
+window.addEventListener("resize", resize);
+resize();
+
+function setMoodFlow(type) {
+  currentMood = type;
+  particles = [];
+  initParticles();
+}
+
+function initParticles() {
+  const count = currentMood === "anxious" ? 120 : 70;
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      vx: (Math.random() - 0.5) * 1.2,
+      vy: (Math.random() - 0.5) * 1.2,
+      size: 2 + Math.random() * 4,
+      life: Math.random() * 100
+    });
+  }
+}
+
+function getWaveY(x, baseY, layerIndex, t) {
+  let y = baseY;
+  const depth = layerIndex * 0.6;
+
+  switch (currentMood) {
+    case "calm":
+      y += Math.sin(t * 0.18 + x * 0.006 + depth) * 35;
+      y += Math.sin(t * 0.12 + x * 0.01 + depth) * 18;
+      break;
+    case "happy":
+      y += Math.sin(t * 0.35 + x * 0.012 + depth) * 50;
+      y += Math.cos(t * 0.25 + x * 0.008 + depth) * 30;
+      break;
+    case "sad":
+      y += Math.sin(t * 0.15 + x * 0.005 + depth) * 28;
+      y += (x * 0.28) * (0.8 + depth * 0.15);
+      break;
+    case "tired":
+      y += Math.sin(t * 0.12 + x * 0.004 + depth) * 65;
+      y += Math.cos(t * 0.08 + x * 0.006 + depth) * 35;
+      break;
+    case "anxious":
+      y += Math.sin(t * 0.45 + x * 0.018 + depth) * 55;
+      y += Math.cos(t * 0.38 + x * 0.014 + depth) * 45;
+      y += (Math.random() - 0.5) * 8;
+      break;
+    case "think":
+      const centerX = w / 2;
+      const dx = x - centerX;
+      y += Math.sin(t * 0.22 + dx * 0.012 + depth) * 42;
+      y += Math.cos(t * 0.18 + dx * 0.009 + depth) * 28;
+      break;
+  }
+
+  return y;
+}
+
+function drawTerrainLayer(layerIndex, reverse = false) {
+  const baseY = h * 0.55 + layerIndex * 18;
+  const startX = reverse ? w : 0;
+  const endX = reverse ? 0 : w;
+  const step = reverse ? -4 : 4;
+
+  ctx.beginPath();
+  ctx.moveTo(startX, baseY);
+
+  for (let x = startX; reverse ? x > endX : x < endX; x += step) {
+    const y = getWaveY(x, baseY, layerIndex, time);
+    ctx.lineTo(x, y);
+  }
+
+  ctx.lineTo(reverse ? 0 : w, h);
+  ctx.lineTo(reverse ? w : 0, h);
+  ctx.closePath();
+
+  const layer = layers[layerIndex % layers.length];
+  ctx.fillStyle = layer.color.replace(/[\d.]+\)$/, `${layer.alpha})`);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(startX, getWaveY(startX, baseY, layerIndex, time));
+  for (let x = startX; reverse ? x > endX : x < endX; x += step) {
+    ctx.lineTo(x, getWaveY(x, baseY, layerIndex, time));
+  }
+  ctx.strokeStyle = layer.color;
+  ctx.lineWidth = layer.lineWidth;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.stroke();
+}
+
+function drawParticles() {
+  particles.forEach(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life += 1;
+
+    if (p.x < 0) p.x = w;
+    if (p.x > w) p.x = 0;
+    if (p.y < 0) p.y = h;
+    if (p.y > h) p.y = 0;
+
+    const alpha = Math.min(1, p.life / 60);
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(160, 210, 180, ${alpha * 0.8})`;
+    ctx.fill();
+  });
+}
+
+function drawGlowLine() {
+  const baseY = h * 0.5;
+  ctx.shadowBlur = 20;
+  ctx.shadowColor = "rgba(90, 140, 120, 0.35)";
+
+  ctx.beginPath();
+  ctx.moveTo(0, getWaveY(0, baseY, 0, time));
+  for (let x = 0; x < w; x += 4) {
+    ctx.lineTo(x, getWaveY(x, baseY, 0, time));
+  }
+  ctx.strokeStyle = "rgba(90, 140, 120, 0.85)";
+  ctx.lineWidth = 2.6;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.stroke();
+
+  ctx.shadowBlur = 0;
+}
+
+function render() {
+  time += 0.025;
+  ctx.clearRect(0, 0, w, h);
+
+  for (let i = 4; i >= 0; i--) {
+    drawTerrainLayer(i, i % 2 === 1);
+  }
+
+  drawGlowLine();
+  drawParticles();
+
+  requestAnimationFrame(render);
+}
+
+initParticles();
+render();
+
+document.documentElement.style.scrollBehavior = "smooth";
+</script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>🌙 Note Wall System Final</title>
+
+<style>
+
+body{
+  margin:0;
+  font-family:"PingFang SC";
+  background:url("images/8.jpg") center/cover no-repeat fixed;
+  height:100vh;
+  overflow:hidden;
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:rgba(255,255,255,0.25);
+  backdrop-filter:blur(2px);
+}
+
+/* 容器 */
+.container{
+  position:relative;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+}
+
+h1{
+  font-size:40px;
+  color:#5b6cff;
+  margin:0;
+}
+
+.box{
+  width:400px;
+  background:rgba(255,255,255,0.9);
+  border-radius:18px;
+  padding:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.12);
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin-bottom:8px;
+  border-radius:12px;
+  border:1px solid #ddd;
+  outline:none;
+}
+
+button{
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  background:#ff7fb9;
+  color:white;
+  font-weight:bold;
+  transition:0.2s;
+}
+
+button:hover{
+  transform:scale(1.03);
+  background:#ff5fa8;
+}
+
+.wall{
+  margin-top:12px;
+  width:430px;
+  max-height:300px;
+  overflow:auto;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:center;
+}
+
+/* 🌟 便签升级 */
+.note{
+  width:180px;
+  min-height:95px;
+  background:#fffdf6;
+  border-radius:14px;
+  padding:10px;
+  box-shadow:0 8px 18px rgba(0,0,0,0.12);
+  position:relative;
+  transform:rotate(var(--r));
+  animation:pop 0.25s ease;
+}
+
+.note:nth-child(odd){ --r:-2deg; }
+.note:nth-child(even){ --r:2deg; }
+
+@keyframes pop{
+  from{transform:scale(0.8);opacity:0;}
+  to{transform:scale(1);opacity:1;}
+}
+
+.time{
+  font-size:11px;
+  color:#777;
+  margin-top:6px;
+}
+
+.del{
+  position:absolute;
+  right:8px;
+  top:6px;
+  cursor:pointer;
+  font-size:12px;
+  color:#ff4d6d;
+}
+
+/* ✂️ 强撕纸效果（升级版） */
+@keyframes tearStrong{
+
+  0%{
+    transform:scale(1) rotate(0deg);
+    opacity:1;
+  }
+
+  25%{
+    transform:scale(1.1) rotate(-3deg);
+  }
+
+  50%{
+    transform:scale(0.95) rotate(8deg);
+    opacity:0.8;
+  }
+
+  75%{
+    transform:scale(0.5) rotate(20deg) translateY(60px);
+    opacity:0.3;
+    filter:blur(2px);
+  }
+
+  100%{
+    transform:scale(0.1) rotate(40deg) translateY(140px);
+    opacity:0;
+    filter:blur(4px);
+  }
+}
+
+.tear{
+  animation:tearStrong 1s cubic-bezier(.2,.9,.2,1) forwards;
+}
+
+/* 🌙 新增：装饰元素 */
+.dec{
+  position:absolute;
+  font-size:12px;
+  opacity:0.7;
+}
+
+.dec.left{ top:6px; left:6px; }
+.dec.right{ top:6px; right:6px; }
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🌙 Note Wall System</h1>
+
+<div class="box">
+
+  <input id="text" placeholder="写下你的计划..." />
+  <input type="datetime-local" id="time" />
+
+  <button onclick="add()">✨ 添加便签</button>
+
+</div>
+
+<div class="wall" id="wall"></div>
+
+</div>
+
+<script>
+
+function getData(){
+  return JSON.parse(localStorage.getItem("noteWall")||"[]");
+}
+
+function save(data){
+  localStorage.setItem("noteWall",JSON.stringify(data));
+}
+
+/* ✨ 添加 */
+function add(){
+
+  let text=document.getElementById("text").value;
+  let time=document.getElementById("time").value;
+
+  if(!text || !time) return;
+
+  let data=getData();
+
+  data.push({
+    text,
+    time,
+    id:Date.now()
+  });
+
+  save(data);
+  render();
+
+  document.getElementById("text").value="";
+}
+
+/* 🌈 emoji库 */
+const icons = ["🌙","🌸","🧸","🍓","✨","🫧","🍰","🌼","🎐","🌈"];
+
+/* 🧠 渲染（已增强视觉） */
+function render(){
+
+  let wall=document.getElementById("wall");
+  wall.innerHTML="";
+
+  let data=getData();
+  data.sort((a,b)=> new Date(b.time)-new Date(a.time));
+
+  data.forEach(item=>{
+
+    let div=document.createElement("div");
+    div.className="note";
+
+    let l = icons[Math.floor(Math.random()*icons.length)];
+    let r = icons[Math.floor(Math.random()*icons.length)];
+
+    div.innerHTML=`
+      <div class="dec left">${l}</div>
+      <div class="dec right">${r}</div>
+
+      <div style="margin-top:18px;">🧸 ${item.text}</div>
+
+      <div class="time">⏰ ${item.time.replace("T"," ")}</div>
+
+      <div class="del" onclick="tear(${item.id},this)">✂</div>
+    `;
+
+    wall.appendChild(div);
+  });
+}
+
+/* ✂️ 撕掉（增强明显度） */
+function tear(id,el){
+
+  let note = el.parentElement;
+  note.style.zIndex = 999;
+  note.classList.add("tear");
+
+  setTimeout(()=>{
+
+    let data = getData().filter(i=>i.id!==id);
+    save(data);
+    render();
+
+  },1000);
+}
+
+render();
+
+</script>
+
+</body>
+</html>

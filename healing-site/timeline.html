@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>Emotion OS v3</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  color:#1a1a1a;
+  background:#f4f6fb;
+  position:relative;
+}
+
+/* =========================
+   背景系统（清晰 + 不干扰UI）
+========================= */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:url("images/16.png") center center / cover no-repeat fixed;
+  opacity:0.28;
+  filter:contrast(1.05) saturate(1.1);
+  z-index:-2;
+}
+
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:rgba(255,255,255,0.35);
+  z-index:-1;
+}
+
+/* =========================
+   布局
+========================= */
+.container{
+  padding:40px;
+  max-width:900px;
+  margin:auto;
+}
+
+/* 标题 */
+h2{
+  font-weight:600;
+}
+
+/* =========================
+   情绪卡片
+========================= */
+.mood-card{
+  background:rgba(255,255,255,0.92);
+  border-radius:14px;
+  padding:18px;
+  margin-bottom:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.06);
+}
+
+/* =========================
+   action按钮
+========================= */
+.action{
+  display:inline-block;
+  margin:6px 6px 0 0;
+  padding:8px 12px;
+  background:#f0f3f8;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:13px;
+  transition:0.2s;
+  border:1px solid transparent;
+}
+
+.action:hover{
+  background:#e7eefc;
+  border:1px solid #c9d7ff;
+  transform:translateY(-1px);
+}
+
+/* =========================
+   modal
+========================= */
+.modal-bg{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.35);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.modal{
+  width:420px;
+  background:white;
+  padding:20px;
+  border-radius:14px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.15);
+}
+
+/* input */
+textarea{
+  width:100%;
+  height:120px;
+  border:1px solid #ddd;
+  border-radius:10px;
+  padding:10px;
+}
+
+/* button */
+button{
+  margin-top:10px;
+  padding:8px 12px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  background:#2f6bff;
+  color:white;
+}
+
+button:hover{
+  background:#1f56e0;
+}
+
+/* =========================
+   情绪驻留模式
+========================= */
+.hold-screen{
+  position:fixed;
+  inset:0;
+  background:rgba(20,25,40,0.92);
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  text-align:center;
+  padding:40px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>🧠 Emotion OS v3</h2>
+  <div id="app"></div>
+</div>
+
+<script>
+
+/* =========================
+   情绪数据
+========================= */
+const emotions = [
+  { mood:"焦虑", actions:["轻记录","观察","创作表达","延长体验时间"] },
+  { mood:"平静", actions:["轻记录","观察","创作表达"] },
+  { mood:"兴奋", actions:["轻记录","观察","创作表达"] }
+];
+
+let holdStartTime = null;
+let holdMood = null;
+let timerInterval = null;
+
+/* =========================
+   渲染
+========================= */
+function render(){
+  const app = document.getElementById("app");
+  app.innerHTML = "";
+
+  emotions.forEach(d=>{
+    const div = document.createElement("div");
+    div.className = "mood-card";
+
+    div.innerHTML = `
+      <h3>🌈 ${d.mood}</h3>
+      <div>
+        ${d.actions.map(a=>`
+          <div class="action"
+            onclick="handleAction('${a}','${d.mood}')">
+            ${a}
+          </div>
+        `).join("")}
+      </div>
+    `;
+
+    app.appendChild(div);
+  });
+}
+
+/* =========================
+   Action系统
+========================= */
+function handleAction(action, mood){
+
+  if(action==="轻记录") openRecorder(mood);
+  if(action==="观察") openObserver(mood);
+  if(action==="创作表达") openExpression(mood);
+  if(action==="延长体验时间") startHoldMode(mood);
+}
+
+/* =========================
+   轻记录
+========================= */
+function openRecorder(mood){
+
+  const box = document.createElement("div");
+  box.className = "modal-bg";
+
+  box.innerHTML = `
+    <div class="modal">
+      <h3>📝 轻记录 · ${mood}</h3>
+      <textarea id="recText"></textarea>
+      <button onclick="saveRecord('${mood}')">保存</button>
+    </div>
+  `;
+
+  document.body.appendChild(box);
+}
+
+function saveRecord(mood){
+
+  const text = document.getElementById("recText").value;
+
+  let data = JSON.parse(localStorage.getItem("emotionOS") || "[]");
+
+  data.push({
+    mood,
+    text,
+    time:new Date().toLocaleString()
+  });
+
+  localStorage.setItem("emotionOS", JSON.stringify(data));
+
+  location.reload();
+}
+
+/* =========================
+   观察
+========================= */
+function openObserver(mood){
+
+  const data = JSON.parse(localStorage.getItem("emotionOS") || "[]")
+    .filter(d=>d.mood===mood);
+
+  const box = document.createElement("div");
+  box.className = "modal-bg";
+
+  box.innerHTML = `
+    <div class="modal" style="width:600px;">
+      <h3>👁️ 观察 · ${mood}</h3>
+
+      ${
+        data.length===0
+        ? "<p>暂无记录</p>"
+        : data.map(d=>`
+          <div style="padding:10px;border-bottom:1px solid #eee;">
+            <div>${d.text}</div>
+            <div style="font-size:12px;color:#999">${d.time}</div>
+          </div>
+        `).join("")
+      }
+
+      <button onclick="this.closest('.modal-bg').remove()">关闭</button>
+    </div>
+  `;
+
+  document.body.appendChild(box);
+}
+
+/* =========================
+   表达
+========================= */
+function openExpression(mood){
+
+  const box = document.createElement("div");
+  box.className = "modal-bg";
+
+  box.innerHTML = `
+    <div class="modal">
+      <h3>🎨 表达 · ${mood}</h3>
+      <textarea></textarea>
+      <button onclick="this.closest('.modal-bg').remove()">退出</button>
+    </div>
+  `;
+
+  document.body.appendChild(box);
+}
+
+/* =========================
+   情绪驻留系统（核心升级）
+========================= */
+function startHoldMode(mood){
+
+  holdStartTime = Date.now();
+  holdMood = mood;
+
+  const box = document.createElement("div");
+  box.className = "hold-screen";
+  box.id = "holdMode";
+
+  box.innerHTML = `
+    <h2>⏳ 情绪驻留模式</h2>
+    <p>你正在停留在：${mood}</p>
+    <p id="timer">已停留：0 秒</p>
+
+    <button onclick="endHoldMode()"
+      style="margin-top:20px;background:white;color:black;">
+      结束体验
+    </button>
+  `;
+
+  document.body.appendChild(box);
+
+  timerInterval = setInterval(()=>{
+    const sec = Math.floor((Date.now()-holdStartTime)/1000);
+    document.getElementById("timer").innerText = "已停留：" + sec + " 秒";
+  },1000);
+}
+
+/* =========================
+   结束驻留 + 反馈
+========================= */
+function endHoldMode(){
+
+  clearInterval(timerInterval);
+
+  const duration = Math.floor((Date.now()-holdStartTime)/1000);
+
+  document.getElementById("holdMode").remove();
+
+  const box = document.createElement("div");
+  box.className = "modal-bg";
+
+  box.innerHTML = `
+    <div class="modal">
+      <h3>🧠 情绪反馈</h3>
+
+      <p>停留时长：${duration} 秒</p>
+
+      <p>情绪变化？</p>
+
+      <button onclick="saveHold('稳定')">稳定</button>
+      <button onclick="saveHold('增强')">增强</button>
+      <button onclick="saveHold('减弱')">减弱</button>
+    </div>
+  `;
+
+  document.body.appendChild(box);
+}
+
+/* 保存驻留反馈 */
+function saveHold(type){
+
+  let data = JSON.parse(localStorage.getItem("emotionHold") || "[]");
+
+  data.push({
+    mood: holdMood,
+    duration: Math.floor((Date.now()-holdStartTime)/1000),
+    feedback: type,
+    time:new Date().toLocaleString()
+  });
+
+  localStorage.setItem("emotionHold", JSON.stringify(data));
+
+  location.reload();
+}
+
+/* init */
+render();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+<meta charset="UTF-8">
+<title>Mood System</title>
+
+<style>
+
+/* =========================
+   🌈 基础背景
+========================= */
+body{
+  margin:0;
+  font-family:sans-serif;
+  background:url("images/8.jpg") center/cover no-repeat fixed;
+  overflow:hidden;
+}
+
+/* =========================
+   🧾 卡片
+========================= */
+.card{
+  width:600px;
+  margin:60px auto;
+  padding:20px;
+  background:rgba(255,255,255,0.92);
+  border-radius:20px;
+  text-align:center;
+  position:relative;
+  z-index:10;
+}
+
+/* =========================
+   🌸 logo
+========================= */
+.logo{
+  width:180px;
+  height:80px;
+  margin:10px auto;
+  background:url("images/5.png") center/contain no-repeat;
+  filter:drop-shadow(0 10px 20px rgba(255,100,180,0.4));
+}
+
+/* =========================
+   🎬 fx层
+========================= */
+.fx-layer{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  z-index:5;
+}
+
+/* =========================
+   📩 信封按钮
+========================= */
+#envelopeBtn{
+  position:fixed;
+  right:20px;
+  top:20px;
+  z-index:9999;
+  font-size:26px;
+  cursor:pointer;
+  background:white;
+  padding:8px 12px;
+  border-radius:12px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.15);
+}
+
+/* =========================
+   📖 日记弹窗
+========================= */
+#diaryPanel{
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:420px;
+  max-height:500px;
+  overflow:auto;
+  background:white;
+  border-radius:15px;
+  padding:15px;
+  z-index:10000;
+  box-shadow:0 20px 60px rgba(0,0,0,0.25);
+}
+
+.diary-item{
+  border-bottom:1px solid #eee;
+  padding:10px 0;
+}
+
+/* =========================
+   动画
+========================= */
+@keyframes fall{
+  to{transform:translateY(110vh);}
+}
+
+@keyframes float{
+  0%{transform:translateY(0);}
+  50%{transform:translateY(-20px);}
+  100%{transform:translateY(0);}
+}
+
+@keyframes breath{
+  0%{opacity:0.4;}
+  50%{opacity:1;}
+  100%{opacity:0.4;}
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- 📩 信封 -->
+<div id="envelopeBtn" onclick="openDiary()">📩</div>
+
+<div class="card">
+
+  <!-- 🌐 NAVIGATION BUTTONS（新增，不影响原功能） -->
+<div style="margin:10px 0 15px 0; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+
+  <button onclick="location.href='about.html'"
+    style="padding:6px 12px;border-radius:10px;border:none;background:#fff;box-shadow:0 5px 15px rgba(0,0,0,0.1);cursor:pointer;">
+    📖 About
+  </button>
+
+  <button onclick="location.href='relief.html'"
+    style="padding:6px 12px;border-radius:10px;border:none;background:#fff;box-shadow:0 5px 15px rgba(0,0,0,0.1);cursor:pointer;">
+    🌿 Relief
+  </button>
+
+  <button onclick="location.href='diary.html'"
+    style="padding:6px 12px;border-radius:10px;border:none;background:#fff;box-shadow:0 5px 15px rgba(0,0,0,0.1);cursor:pointer;">
+    📩 Diary
+  </button>
+
+</div>
+
+  <h2>🌸 Mood System</h2>
+
+  <div class="logo"></div>
+
+  <button onclick="setMood('happy')">😊 开心</button>
+  <button onclick="setMood('calm')">🌿 平静</button>
+  <button onclick="setMood('sad')">😢 低落</button>
+  <button onclick="setMood('tired')">😩 疲惫</button>
+  <button onclick="setMood('relax')">🌸 放松</button>
+  <button onclick="setMood('think')">🧠 思考</button>
+
+  <textarea id="text" style="width:90%;height:100px;margin-top:10px;"></textarea>
+
+  <br><br>
+  <button onclick="save()">保存</button>
+
+</div>
+
+<div id="fx" class="fx-layer"></div>
+
+<script>
+
+let moodNow="calm";
+
+/* =========================
+   主入口
+========================= */
+function setMood(type){
+
+  moodNow=type;
+  clear();
+
+  if(type==="calm") calm();
+  if(type==="sad") sad();
+  if(type==="happy") happy();
+  if(type==="tired") tired();
+  if(type==="relax") relax();
+  if(type==="think") think();
+}
+
+/* =========================
+   🌿 平静
+========================= */
+function calm(){
+  let fx = layer();
+
+  let core = document.createElement("div");
+  core.style.position="absolute";
+  core.style.left="50%";
+  core.style.top="50%";
+  core.style.transform="translate(-50%,-50%)";
+  core.style.width="380px";
+  core.style.height="380px";
+  core.style.borderRadius="50%";
+  core.style.background="radial-gradient(circle, rgba(120,255,200,0.75), rgba(120,255,200,0.15), transparent 70%)";
+  core.style.animation="breath 3s ease-in-out infinite";
+
+  fx.appendChild(core);
+}
+
+/* =========================
+   😢 低落
+========================= */
+function sad(){
+
+  let fx=layer();
+
+  let dark=document.createElement("div");
+  dark.style.position="absolute";
+  dark.style.width="100%";
+  dark.style.height="100%";
+  dark.style.background="rgba(20,40,80,0.45)";
+  fx.appendChild(dark);
+
+  for(let i=0;i<120;i++){
+    let r=document.createElement("div");
+    r.style.position="absolute";
+    r.style.width="2px";
+    r.style.height="20px";
+    r.style.background="rgba(180,210,255,0.8)";
+    r.style.left=Math.random()*100+"%";
+    r.style.top="-20px";
+    r.style.animation=`fall ${0.8+Math.random()}s linear infinite`;
+    fx.appendChild(r);
+  }
+}
+
+/* =========================
+   😊 开心
+========================= */
+function happy(){
+
+  let colors=["#ff4f93","#ffd166","#7bdff2","#c77dff"];
+  let fx=layer();
+
+  for(let i=0;i<60;i++){
+    let p=document.createElement("div");
+    p.style.position="absolute";
+    p.style.width="8px";
+    p.style.height="8px";
+    p.style.borderRadius="50%";
+    p.style.background=colors[Math.floor(Math.random()*colors.length)];
+    p.style.left=Math.random()*100+"%";
+    p.style.top=Math.random()*100+"%";
+    p.style.animation="float 3s ease-in-out infinite";
+    fx.appendChild(p);
+  }
+}
+
+/* =========================
+   🌸 放松
+========================= */
+function relax(){
+
+  let fx=layer();
+
+  for(let i=0;i<30;i++){
+    let b=document.createElement("div");
+    b.style.position="absolute";
+    b.style.width="20px";
+    b.style.height="20px";
+    b.style.borderRadius="50%";
+    b.style.background="rgba(255,255,255,0.2)";
+    b.style.left=Math.random()*100+"%";
+    b.style.top=Math.random()*100+"%";
+    b.style.animation="float 4s ease-in-out infinite";
+    fx.appendChild(b);
+  }
+}
+
+/* =========================
+   😩 疲惫
+========================= */
+function tired(){
+
+  let fx=layer();
+
+  for(let i=0;i<25;i++){
+    let p=document.createElement("div");
+    p.style.position="absolute";
+    p.style.width="10px";
+    p.style.height="10px";
+    p.style.borderRadius="50%";
+    p.style.background="rgba(200,200,200,0.4)";
+    p.style.left=Math.random()*100+"%";
+    p.style.top=Math.random()*100+"%";
+    p.style.animation="float 5s ease-in-out infinite";
+    fx.appendChild(p);
+  }
+}
+
+/* =========================
+   🧠 思考
+========================= */
+function think(){
+
+  let fx=layer();
+
+  let bg=document.createElement("div");
+  bg.style.position="absolute";
+  bg.style.width="100%";
+  bg.style.height="100%";
+  bg.style.background="radial-gradient(circle, rgba(160,120,255,0.25), transparent)";
+  fx.appendChild(bg);
+}
+
+/* =========================
+   保存
+========================= */
+function save(){
+
+  let data=JSON.parse(localStorage.getItem("moodData")||"[]");
+
+  data.push({
+    mood:moodNow,
+    text:document.getElementById("text").value,
+    time:new Date().toLocaleString()
+  });
+
+  localStorage.setItem("moodData",JSON.stringify(data));
+
+  alert("已保存到 Emotion OS 📩");
+}
+
+/* =========================
+   📩 打开信封（重点）
+========================= */
+function openDiary(){
+
+  let old=document.getElementById("diaryPanel");
+  if(old) old.remove();
+
+  let panel=document.createElement("div");
+  panel.id="diaryPanel";
+
+  let data=JSON.parse(localStorage.getItem("moodData")||"[]").reverse();
+
+  panel.innerHTML=`
+    <h3>📖 Emotion Diary</h3>
+    <button onclick="document.getElementById('diaryPanel').remove()">关闭</button>
+    <hr>
+    ${data.length?data.map(d=>`
+      <div class="diary-item">
+        <b>${d.mood}</b><br>
+        ${d.text}<br>
+        <small>${d.time}</small>
+      </div>
+    `).join(""):"暂无记录"}
+  `;
+
+  document.body.appendChild(panel);
+}
+
+/* =========================
+   工具
+========================= */
+function layer(){
+  const fx=document.getElementById("fx");
+  fx.innerHTML="";
+  return fx;
+}
+
+function clear(){
+  layer();
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,215 @@
+/* =========================
+   全局基础
+========================= */
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family: "PingFang SC", sans-serif;
+}
+
+/* =========================
+   ⭐ INDEX背景（重点修复）
+   ========================= */
+
+body.index{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    /* ⭐ 关键：保证5.png显示 */
+    background-image: url("images/5.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    overflow:hidden;
+}
+
+/* 轻柔光感（不虚化背景，只增强层次） */
+body.index::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background: radial-gradient(circle at 30% 30%, rgba(255,200,220,0.25), transparent 60%),
+                radial-gradient(circle at 70% 70%, rgba(180,220,255,0.25), transparent 60%);
+    pointer-events:none;
+}
+
+/* =========================
+   中心卡片（稳定居中）
+========================= */
+.center-card{
+    width:520px;
+    padding:50px 40px;
+    border-radius:28px;
+
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(6px);
+
+    box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+
+    text-align:center;
+
+    position:relative;
+    z-index:2;
+}
+
+/* =========================
+   标题（梦幻升级）
+========================= */
+.title{
+    font-size:40px;
+    font-weight:700;
+    color:#6f6cf6;
+    letter-spacing:2px;
+
+    text-shadow: 0 6px 20px rgba(120,120,255,0.25);
+}
+
+.sub{
+    margin-top:10px;
+    font-size:14px;
+    color:#666;
+}
+
+/* =========================
+   按钮
+========================= */
+.btn-group{
+    margin-top:30px;
+    display:flex;
+    gap:15px;
+    justify-content:center;
+    flex-wrap:wrap;
+}
+
+.btn{
+    padding:12px 18px;
+    border-radius:999px;
+    text-decoration:none;
+
+    background:white;
+    color:#444;
+
+    box-shadow:0 8px 20px rgba(0,0,0,0.08);
+
+    transition:0.3s;
+}
+
+.btn:hover{
+    transform:translateY(-3px);
+    background:#f7f6ff;
+}
+
+/* =========================
+   粒子（轻装饰）
+========================= */
+.particles::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background-image: radial-gradient(circle, #ffb6d5 2px, transparent 3px),
+                      radial-gradient(circle, #b6e6ff 2px, transparent 3px),
+                      radial-gradient(circle, #fff2b6 2px, transparent 3px);
+    background-size:120px 120px;
+    opacity:0.35;
+    animation: float 8s linear infinite;
+}
+
+@keyframes fall{
+  to{transform:translateY(120vh);}
+}
+
+@keyframes float{
+  0%{transform:translateY(0);}
+  50%{transform:translateY(-18px);}
+  100%{transform:translateY(0);}
+}
+
+@keyframes breath{
+  0%{opacity:0.6;}
+  50%{opacity:1;}
+  100%{opacity:0.6;}
+}
+/* 🌟 全局轻微呼吸光（不改变原背景） */
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255,182,193,0.08), transparent 40%),
+    radial-gradient(circle at 80% 30%, rgba(135,206,250,0.08), transparent 45%),
+    radial-gradient(circle at 50% 80%, rgba(255,228,181,0.06), transparent 50%);
+
+  animation: floatGlow 8s ease-in-out infinite alternate;
+}
+
+@keyframes floatGlow{
+  from{transform:scale(1);}
+  to{transform:scale(1.05);}
+}
+img{
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+img:hover{
+  transform: scale(1.08) rotate(1deg);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+button:active{
+  transform: scale(0.96);
+  filter: brightness(1.05);
+}
+.item{
+  position:relative;
+  overflow:hidden;
+}
+
+/* 🌈 轻微记忆流动光 */
+.item::after{
+  content:"";
+  position:absolute;
+  inset:0;
+
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255,255,255,0.25),
+    transparent
+  );
+
+  transform: translateX(-100%);
+  animation: shine 6s infinite;
+}
+
+@keyframes shine{
+  0%{transform:translateX(-100%);}
+  40%{transform:translateX(100%);}
+  100%{transform:translateX(100%);}
+}
+
+/* 🌈 全局呼吸光 */
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255,182,193,0.08), transparent 40%),
+    radial-gradient(circle at 80% 30%, rgba(135,206,250,0.08), transparent 45%),
+    radial-gradient(circle at 50% 80%, rgba(255,228,181,0.06), transparent 50%);
+}
+
+/* ✨ hover统一 */
+button, img, .item{
+  transition:0.25s ease;
+}
+
+button:active{
+  transform:scale(0.96);
+}
